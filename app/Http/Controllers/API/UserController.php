@@ -74,14 +74,14 @@ class UserController extends Controller
                 'image' => ['required','image','max:2048'],
             ]);
 
-            $basic  = new \Vonage\Client\Credentials\Basic("96e60a70", "tMP7BHTvoYAxyMbb");
-            $client = new \Vonage\Client($basic);
+        //     $basic  = new \Vonage\Client\Credentials\Basic(env("NEXMO_KEY"), env("NEXMO_SECRET"));
+        //     $client = new \Vonage\Client($basic);
 
-            $response = $client->sms()->send(
-                new \Vonage\SMS\Message\SMS("$request->phone", 'Hendris', 'Selamat Datang, Terima kasih telah bergabung dengan kami.')
-            );
+        //     $response = $client->sms()->send(
+        //         new \Vonage\SMS\Message\SMS("$request->phone", 'Hendris', 'Selamat Datang, Terima kasih telah bergabung dengan kami.')
+        //     );
             
-           $response->current();
+        //    $response->current();
 
             $file = $request->file('image')->store('assets/user', 'public');
 
