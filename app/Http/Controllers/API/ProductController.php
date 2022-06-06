@@ -76,7 +76,7 @@ class ProductController extends Controller
                     $save[] = Storage::url($file->store('assets/product', 'public'));
                 }
 
-                $product['product_image'] = json_encode($save, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                $product['product_image'] = json_encode($save, JSON_UNESCAPED_SLASHES);
                 $product->save();
     
                 $produk = Product::where('user_id', Auth::user()->id)

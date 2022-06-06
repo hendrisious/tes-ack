@@ -21,8 +21,8 @@ class Store extends Model
         return $toArray;
     }
 
-    public function getPicturePathAttribute()
+    public function getStoreImageAttribute()
     {
-        return url('') . Storage::url($this->attributes['store_image']);
+        return $this->attributes['store_image'];
     }
 }
