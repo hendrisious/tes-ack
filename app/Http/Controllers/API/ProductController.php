@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
@@ -42,10 +43,11 @@ class ProductController extends Controller
                 );
         }
 
-        $all = $products->get();
+        $all = Product::latest()->get();
 
-        return ResponseFormatter::success(
-            ['products' => $all],
+        return ResponseFormatter::success([
+            'all-product' => ProductResource::collection($all)
+        ],
             'Stores Data Retrived Successfully');
     }
 
@@ -97,6 +99,7 @@ class ProductController extends Controller
             }
         }
     }
+
 
     public function update(Request $request, Product $product)
     {
