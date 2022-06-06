@@ -14,15 +14,4 @@ class Store extends Model
         'store_name', 'address', 'city', 'province', 'store_image', 'user_id'
     ];
 
-    public function toArray()
-    {
-        $toArray = parent::toArray();
-        $toArray['store_image'] = $this->store_image;
-        return $toArray;
-    }
-
-    public function getStoreImageAttribute()
-    {
-        return $this->attributes['store_image'];
-    }
 }

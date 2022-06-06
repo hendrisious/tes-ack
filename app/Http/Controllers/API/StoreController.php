@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreRequest;
+use App\Http\Resources\StoreResource;
 use App\Models\Store;
 use Exception;
 use Illuminate\Http\Request;
@@ -41,16 +43,20 @@ class StoreController extends Controller
                 );
         }
 
-        $alls = $stores->get();
+        $data = Store::latest()->get();
 
         return ResponseFormatter::success([
-            'stores' => $alls
-        ],'Stores Data Retrived Successfully');
+            'all-store' => StoreResource::collection($data)
+        ],'Berhasil');
+        
     }
 
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
+        $data = $request->all();
+
         $sumStore = Store::where('user_id', Auth::user()->id)->count();
+
         if($sumStore >= 5)
         {
             return ResponseFormatter::error(
@@ -67,27 +73,16 @@ class StoreController extends Controller
             }
             else{
                 try {
-                    $request->validate([
-                        'store_name' => ['required','string', 'max:100'],
-                        'address' => ['required','string', 'max:255'],
-                        'city' => ['required','string', 'max:50'],
-                        'province' => ['required','string', 'max:50'],
-                        'store_image[]' => ['image']
-                    ]);
 
                     foreach($request->file('store_image') as $file)
                     {
-                        $save[] = Storage::url($file->store('assets/store', 'public'));
+                        $images[] = $file->store('assets/store', 'public');
                     }
-        
-                    $store = new Store();
-                    $store->user_id = Auth::user()->id;
-                    $store->store_name = $request->store_name;
-                    $store->address = $request->address;
-                    $store->city = $request->city;
-                    $store->province = $request->province;
-                    $store->store_image = json_encode($save, JSON_UNESCAPED_SLASHES);
-                    $store->save();
+
+                    $data['user_id'] = Auth::user()->id;
+                    $data['store_image'] = json_encode($images, JSON_UNESCAPED_SLASHES);
+
+                    Store::create($data);
         
                     $toko = Store::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->first();
         
