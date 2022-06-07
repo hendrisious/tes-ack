@@ -76,7 +76,7 @@ class StoreController extends Controller
 
                     foreach($request->file('store_image') as $file)
                     {
-                        $images[] = $file->store('assets/store', 'public');
+                        $images[] = Storage::url($file->store('assets/store', 'public'));
                     }
 
                     $data['user_id'] = Auth::user()->id;

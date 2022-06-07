@@ -15,12 +15,16 @@ class StoreResource extends JsonResource
     public function toArray($request)
     {
         $images= json_decode($this->store_image);
+        foreach($images as $image)
+        {
+            $loop[] = url('') . $image;
+        }
 
         return [
             'id' => $this->id,
             'store_name' => $this->store_name,
             'address'=> $this->address,
-            'store_image' => $images
+            'store_image' => $loop
         ];
     }
 }

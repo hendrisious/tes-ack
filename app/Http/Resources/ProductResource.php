@@ -14,11 +14,17 @@ class ProductResource extends JsonResource
      */
     public function toArray($request)
     {
+        $images = json_decode($this->product_image);
+        foreach($images as $image)
+        {
+            $loop[] = url('') . $image;
+        }
+
         return [
             'store_id' => $this->id,
             'product_name' => $this->product_name,
             'price' => $this->price,
-            'product_image'=> json_decode($this->product_image)
+            'product_image'=> $loop
         ];
     }
 }
