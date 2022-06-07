@@ -60,7 +60,7 @@ class StoreController extends Controller
         if($sumStore >= 5)
         {
             return ResponseFormatter::error(
-                null, 'Toko tidak boleh lebih dari 3'
+                null, 'Toko tidak boleh lebih dari 5'
             );
         }
         else
@@ -84,14 +84,10 @@ class StoreController extends Controller
 
                     Store::create($data);
         
-                    $toko = Store::where('user_id', Auth::user()->id)->orderBy('id', 'desc')->first();
+                    $data = Store::where('user_id', Auth::user()->id)->latest()->get();
         
                     return ResponseFormatter::success([
-                        'name' => $toko->store_name,
-                        'address' => $toko->address,
-                        'city' => $toko->city,
-                        'province' => $toko->province,
-                        'store_image' => json_decode($toko->store_image)
+                        'store-data' => StoreResource::collection($data)
                     ], 'Store created Succrssfully');
         
                 }catch(Exception $error)
