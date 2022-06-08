@@ -14,4 +14,9 @@ class Store extends Model
         'store_name', 'address', 'city', 'province', 'store_image', 'user_id'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }

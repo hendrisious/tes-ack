@@ -6,7 +6,9 @@ use App\Helpers\ResponseFormatter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRequest;
 use App\Http\Resources\StoreResource;
+use App\Http\Resources\UserResource;
 use App\Models\Store;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,47 +16,35 @@ use Illuminate\Support\Facades\Storage;
 
 class StoreController extends Controller
 {
-    public function all(Request $request)
+    public function all(Request $request, Store $store)
     {
-        $id = $request->input('id');
-
-        $stores = Store::join('users', 'user_id', 'users.id')
-                ->select('stores.id as store_id','store_name','address','city','province', 'store_image', 'name');
-
+        $id = $request->input('store_id');
+        $data = $store->find($id);
         if($id)
         {
-            $store = $stores->where('stores.id', $id)->first();
-            
-            if($store)
+            $user = new UserResource(User::find($data->user_id));
+            $detail = new StoreResource($data);
+            if($data)
                 return ResponseFormatter::success([
-                    'store_id' => $store->store_id,
-                    'store_name' => $store->store_name,
-                    'address' => $store->address,
-                    'city' => $store->city,
-                    'province' => $store->province,
-                    'store_owner' => $store->name,
-                    'store_images' => json_decode($store->store_image) 
+                    'detail-store' => $detail,
+                    'store-owner' => $user
                 ],'Detail Store Retrived Successfully');
             else 
                 return ResponseFormatter::error(
                     null,
-                    'Cannot get detail store data!',
-                    404
+                    'Cannot get detail store data, Data not found !',
+                    402
                 );
         }
 
-        $data = Store::latest()->get();
-
         return ResponseFormatter::success([
-            'all-store' => StoreResource::collection($data)
-        ],'Berhasil');
-        
+            'all-store' => StoreResource::collection(Store::get())
+        ],'Show all data store successfully');
     }
 
     public function store(StoreRequest $request)
     {
         $data = $request->all();
-
         $sumStore = Store::where('user_id', Auth::user()->id)->count();
 
         if($sumStore >= 5)
@@ -72,8 +62,8 @@ class StoreController extends Controller
                 );
             }
             else{
-                try {
-
+                try 
+                {
                     foreach($request->file('store_image') as $file)
                     {
                         $images[] = Storage::url($file->store('assets/store', 'public'));
@@ -83,35 +73,26 @@ class StoreController extends Controller
                     $data['store_image'] = json_encode($images, JSON_UNESCAPED_SLASHES);
 
                     Store::create($data);
-        
-                    $data = Store::where('user_id', Auth::user()->id)->latest()->get();
-        
+                    $new_data = Store::where('user_id', Auth::user()->id)->latest()->get();
+
                     return ResponseFormatter::success([
-                        'store-data' => StoreResource::collection($data)
+                        'store-data' => StoreResource::collection($new_data)
                     ], 'Store created Succrssfully');
         
-                }catch(Exception $error)
+                }
+                catch(Exception $error)
                 {
                     return ResponseFormatter::error([
-                        'message' => 'Ada yang salah',
-                        'error' => $error
-                    ]);
+                        'store-data' => []
+                    ], $error, 500);
                 }
             }
-
         }
-
     }
 
     public function update(Request $request, Store $store)
     {
-        $request->validate([
-            'store_name' => ['required','string', 'max:100'],
-            'address' => ['required','string', 'max:255'],
-            'city' => ['required','string', 'max:50'],
-            'province' => ['required','string', 'max:50'],
-            'store_image[]' => ['image']
-        ]);
+        $data = $request->all();
 
         if(count($request->store_image) >= 4)
         {
@@ -122,28 +103,19 @@ class StoreController extends Controller
         else
         {
             $str = $store->find($request->input('id'));
-            $str->store_name = $request->store_name;
-            $str->address = $request->address;
-            $str->city = $request->city;
-            $str->province = $request->province;
-    
             foreach($request->file('store_image') as $file)
             {
                 $save[] = Storage::url($file->store('assets/store', 'public'));
             }
     
-            $str->store_image = json_encode($save, JSON_UNESCAPED_SLASHES);
-            $str->save();
+            $data['store_image'] = json_encode($save, JSON_UNESCAPED_SLASHES);
+            $str->update($data);
         }
     
-        $toko = Store::find($request->input('id'));
+        $new_store = $store->find($request->input('id'));
 
         return ResponseFormatter::success([
-            'name' => $toko->store_name,
-            'address' => $toko->address,
-            'city' => $toko->city,
-            'province' => $toko->province,
-            'store_image' => json_decode($toko->store_image)
-        ]);
+            'new-store' => new StoreResource($new_store)
+        ],'Store updates successfully', 200);
     }
 }

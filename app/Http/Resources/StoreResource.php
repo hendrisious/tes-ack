@@ -24,7 +24,10 @@ class StoreResource extends JsonResource
             'id' => $this->id,
             'store_name' => $this->store_name,
             'address'=> $this->address,
-            'store_image' => $loop
+            'city' => $this->city,
+            'privince' => $this->province,
+            'store_image' => $loop,
+            'owner' => UserResource::collection($this->whenLoaded(relationship: 'user'))
         ];
     }
 }
